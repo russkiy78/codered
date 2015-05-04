@@ -6,14 +6,14 @@
  * Time: 13:12
  */
 
-define('VECTOR_LEN', 10);
+define('VECTOR_LEN', 100);
 define('VECTOR_MAX_ELEMENT', 500);
 define('VECTOR_MIN_ELEMENT', 2);
 
 define('CYCLES', 20);
 define('MAX_PRIME', 100);
 
-define('PLUS_MINUS_COUNT', 100);
+define('PLUS_MINUS_COUNT', 10);
 
 
 //$invert = gmp_invert("10", "17");
@@ -105,18 +105,19 @@ echo "\n".min($open);
   * */
 
 // plus-minus
-echo "\nplus-minus:";
-for ($i = 1; $i <= 10; $i++) {
-    $rnd=count($open) - 1;
-    $num = rand(0, $rnd);
+echo "\n\nplus-minus:";
+for ($i = 1; $i <= 100; $i++) {
+    $rnd=rand(0, count($open) - 1);
+    $num = $open[$rnd];
+
     for ($j = 0; $j < PLUS_MINUS_COUNT; $j++) {
-        $rnd=count($open) - 1;
-        $num+= rand(0, $rnd);
+        $rnd=rand(0, count($open) - 1);
+        $num += $open[$rnd];
     }
-    for ($j = 0; $j < PLUS_MINUS_COUNT-1; $j++) {
+    for ($j = 0; $j < PLUS_MINUS_COUNT; $j++) {
         $prevnum=$num;
-        $rnd=count($open) - 1;
-        $num-= rand(0, $rnd);
+        $rnd=rand(0, count($open) - 1);
+        $num -=  $open[$rnd];
         if ($num<0) { $num=$prevnum;  break; }
     }
     echo "\n$num ";
