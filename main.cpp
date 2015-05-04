@@ -1,5 +1,6 @@
 #include <iostream>
 #include <stdint.h>
+#include <gmp.h>
 
 using namespace std;
 
