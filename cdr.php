@@ -43,6 +43,7 @@ for ($i = 0; $i < VECTOR_LEN / 2; $i++) {
     while (in_array($random, $matrix_even) || $random % 2 > 0) $random = rand(VECTOR_MIN_ELEMENT, VECTOR_MAX_ELEMENT);
     $matrix_even[] = $random;
 }
+
 for ($i = 0; $i < VECTOR_LEN; $i++) {
     $matrix[] = ($i % 2 ? array_shift($matrix_odd) : array_shift($matrix_even));
 }
