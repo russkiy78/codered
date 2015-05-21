@@ -17,34 +17,48 @@
 </head>
 <body>
 <h2 align="center">CodeRed Cryptosystem demo</h2>
+
 <div class="row">
     <div class="col-md-10 col-md-offset-1">
         <div class="row">
             <div class="col-md-3  bordered">
                 <h3>Init params</h3>
+
                 <p id="keyparam"></p>
+
                 <p>
-                    <a  id="genkey"  class="btn btn-success has-spinner">
+                    <a id="genkey" class="btn btn-success has-spinner">
                         <span class="spinner"><i class="fa fa-spinner fa-spin"></i></span>
                         Generate private and open key
                     </a>
                 </p>
+
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" id="debug" value="1">
+                        Enable debug!
+                    </label>
+                </div>
+
             </div>
             <div class="col-md-3  bordered">
-               <h3>Open key</h3>
+                <h3>Open key</h3>
+
                 <p id="openkey"></p>
             </div>
             <div class="col-md-3  bordered">
                 <h3>Private key</h3>
+
                 <p id="privatekey"></p>
             </div>
         </div>
-        <div class="row" id="sendreceive" >
+        <div class="row" id="sendreceive">
             <div class="col-md-3 bordered">
                 <h3>Send</h3>
                 <textarea id="send" rows="4" cols="30"></textarea>
+
                 <p>
-                    <a  id="sendbut"  class="btn btn-success has-spinner">
+                    <a id="sendbut" class="btn btn-success has-spinner">
                         <span class="spinner"><i class="fa fa-spinner fa-spin"></i></span>
                         Send
                     </a>
@@ -52,11 +66,26 @@
             </div>
             <div class="col-md-3 bordered">
                 <h3>Transmitted Data</h3>
+
                 <p id="data"></p>
             </div>
             <div class="col-md-3 bordered">
                 <h3>Receive</h3>
+
                 <p id="receive"></p>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-11 bordered">
+                <h3>Debugging</h3>
+
+                <p>
+                    <a id="cleardebug" class="btn btn-warning">
+                        Clear debug
+                    </a>
+                </p>
+
+                <p id="debugrow"></p>
             </div>
         </div>
 

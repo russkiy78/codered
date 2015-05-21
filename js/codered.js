@@ -6,7 +6,9 @@
 function Codered() {
 
     /* init const */
-    this.keyLen = 100;
+    this.debug = true;
+
+    this.keyLen = 4;
     this.circles = 3;
     this.maxq = 10;
     this.minr = 100;
@@ -14,12 +16,18 @@ function Codered() {
     this.maxplus = 10;
     this.minplus = 8;
 
-    this.maxminus = 3;
-    this.minminus = 2;
+    this.maxminus = 2;
+    this.minminus = 0;
+
+    /*debug values*/
+    this.debugval = {
+        privatekeys: new Array(this.circles)
+
+    };
 
 
     /* private key */
-    this.initprivatekey = [];
+    this.initprivatekey = new Array(this.keyLen + 1);
     this.privatekey = {
         q: new Array(this.circles),
         r: new Array(this.circles),
@@ -29,52 +37,83 @@ function Codered() {
     this.openkey = new Uint32Array(this.keyLen);
 
 }
+Codered.prototype.writedebug = function (text) {
+    console.log(text);
+};
 
 Codered.prototype.createKey = function () {
 
-    /* private key */
-    this.initprivatekey = [];
-    this.privatekey = {
-        q: new Array(this.circles),
-        r: new Array(this.circles),
-        invert: new Array(this.circles)
-    };
-    /* open key */
-    this.openkey = new Uint32Array(this.keyLen);
-
-    var cryptoObj = window.crypto || window.msCrypto;
-
-    // create two array - with even and odd digits
-    var matrix_even = new Uint16Array(Math.floor(this.keyLen / 2));
-    cryptoObj.getRandomValues(matrix_even); //  чет
-    Array.prototype.forEach.call(matrix_even, function (item, i, arr) {
-        arr[i] = (item % 2 ? item + (Math.floor(Math.random() * 2) ? -1 : 1) : item);
-    });
-
-
-    var matrix_odd = new Uint16Array(Math.floor(this.keyLen / 2));
-    cryptoObj.getRandomValues(matrix_odd); // нечет
-    Array.prototype.forEach.call(matrix_odd, function (item, i, arr) {
-        arr[i] = (item % 2 ? item : item + (Math.floor(Math.random() * 2) ? -1 : 1));
-    });
-
-    // merge arrays
-    for (var i = 0; i < this.keyLen; i++) {
-        this.initprivatekey.push(( i % 2 ? matrix_odd[(i == 1 ? 0 : Math.floor(i / 2))] : matrix_even[(i == 0 ? 0 : i / 2)] ));
-    }
-
-    //create open keys
-    this.openkey = this.initprivatekey.slice();
-
-    for (var i = 0; i < this.circles; i++) {
-
-        this.privatekey.q[i] = this.nextPrime((Math.max.apply(null, this.openkey) * this.maxplus) - (Math.min.apply(null, this.openkey) * this.maxminus), Math.floor(Math.random() * this.maxq));
-        this.privatekey.r[i] = Math.floor(Math.random() * (this.privatekey.q[i] - this.minr)) + this.minr
-        this.privatekey.invert[i] = this.getInvert(this.privatekey.r[i], this.privatekey.q[i]);
-        for (var j = 0; j < this.keyLen; j++) {
-            this.openkey[j] = this.openkey[j] * this.privatekey.r[i] % this.privatekey.q[i];
+    if (this.keyLen % 2) {
+        if (this.debug) {
+            this.writedebug("keyLen must be even digit");
         }
+        return false;
     }
+
+    up:   do {
+
+        if (this.debug) {
+            this.writedebug("gen");
+        }
+        /* private key */
+        this.initprivatekey = [];
+        this.privatekey = {
+            q: new Array(this.circles),
+            r: new Array(this.circles),
+            invert: new Array(this.circles)
+        };
+        /* open key */
+        this.openkey = new Uint32Array(this.keyLen);
+
+        var cryptoObj = window.crypto || window.msCrypto;
+
+        // create two array - with even and odd digits
+        var matrix_even = new Uint16Array(Math.floor(this.keyLen / 2));
+        cryptoObj.getRandomValues(matrix_even); //  чет
+        Array.prototype.forEach.call(matrix_even, function (item, i, arr) {
+            arr[i] = (item % 2 ? item + (Math.floor(Math.random() * 2) ? -1 : 1) : item);
+        });
+
+
+        var matrix_odd = new Uint16Array(Math.floor(this.keyLen / 2));
+        cryptoObj.getRandomValues(matrix_odd); // нечет
+        Array.prototype.forEach.call(matrix_odd, function (item, i, arr) {
+            arr[i] = (item % 2 ? item : item + (Math.floor(Math.random() * 2) ? -1 : 1));
+        });
+
+        // merge arrays
+        for (var i = 0; i < this.keyLen; i++) {
+            this.initprivatekey.push(( i % 2 ? matrix_odd[(i == 1 ? 0 : Math.floor(i / 2))] : matrix_even[(i == 0 ? 0 : i / 2)] ));
+        }
+
+        //create open keys
+        this.openkey = this.initprivatekey.slice();
+
+        if (this.debug) {
+            this.debugval.privatekeys[0] = this.initprivatekey.slice();
+        }
+
+        for (var i = 0; i < this.circles; i++) {
+
+            this.privatekey.q[i] = this.nextPrime((Math.max.apply(null, this.openkey) * this.maxplus) - (Math.min.apply(null, this.openkey) * this.maxminus), Math.floor(Math.random() * this.maxq));
+            this.privatekey.r[i] = Math.floor(Math.random() * (this.privatekey.q[i] - this.minr)) + this.minr
+            this.privatekey.invert[i] = this.getInvert(this.privatekey.r[i], this.privatekey.q[i]);
+            for (var j = 0; j < this.keyLen; j++) {
+                this.openkey[j] = this.openkey[j] * this.privatekey.r[i] % this.privatekey.q[i];
+                if (this.openkey[j] == 0) {
+                    if (this.debug) {
+                        this.writedebug("zero finded");
+                    }
+                    continue up;
+                }
+            }
+            if (this.debug) {
+                this.debugval.privatekeys[i + 1] = this.openkey.slice();
+            }
+        }
+    } while (0);
+    return true;
+
 };
 
 Codered.prototype.encode = function (bit) {
@@ -82,60 +121,77 @@ Codered.prototype.encode = function (bit) {
 
 
         var randplus = Math.floor(Math.random() * (this.maxplus - this.minplus)) + this.minplus;
-     //   console.log("randplus " + randplus);
-
+        if (this.debug) { this.writedebug("randplus "+randplus); }
 
         //plus
         var oddcount = Math.floor(Math.random() * randplus);
 
-        oddcount = (bit == 1 ? (oddcount % 2 ? oddcount : oddcount + (Math.floor(Math.random() * 2) && oddcount>0 ? -1 : 1)) :
-            (oddcount % 2 ? oddcount + (Math.floor(Math.random() * 2) && oddcount>0 ? -1 : 1) : oddcount ));
+        oddcount = (bit == 1 ? (oddcount % 2 ? oddcount : oddcount + (Math.floor(Math.random() * 2) && oddcount > 0 ? -1 : 1)) :
+            (oddcount % 2 ? oddcount + (Math.floor(Math.random() * 2) && oddcount > 0 ? -1 : 1) : oddcount ));
+        if (this.debug) { this.writedebug("oddcount "+oddcount); }
         var evencount = randplus - oddcount;
-
-
-     //   console.log("evencount " + evencount);
-    //    console.log("oddcount " + oddcount);
-
+        if (this.debug) { this.writedebug("evencount "+evencount); }
         var sum = 0;
-
-
+        /**/
         for (var i = 0; i < randplus; i++) {
             var randposition = Math.floor(Math.random() * (this.keyLen - 1));
+            if (this.debug) { this.writedebug("randposition "+randposition); }
             if (evencount > 0) {
                 var pp = this.openkey[(randposition % 2 ? randposition - 1 : randposition)];
                 sum += pp;
-             //   console.log("even plus " + pp + " pos "+(randposition % 2 ? randposition - 1 : randposition)+" private " + this.initprivatekey[(randposition % 2 ? randposition - 1 : randposition)]);
-                evencount--;
+               evencount--;
+                if (this.debug) {
+                    if (this.debugval.privatekeys.length) {
+                        var deb='';
+                        for (var k = 0; k < this.circles; k++) {
+                           deb +="even plus "+k+" : "+this.debugval.privatekeys[k][(randposition % 2 ? randposition - 1 : randposition)]+"<br>";
+                        }
+                        this.writedebug(deb);
+                    }
+                }
             } else {
                 var pp = this.openkey[(randposition % 2 ? randposition : (randposition == 0 ? 1 : randposition - 1  ))];
                 sum += pp;
-             //   console.log("odd plus " + pp + " pos "+(randposition % 2 ? randposition : (randposition == 0 ? 1 : randposition - 1  ))+" private " + this.initprivatekey[(randposition % 2 ? randposition : (randposition == 0 ? 1 : randposition - 1  ))]);
-                oddcount--;
+               oddcount--;
+                if (this.debug) {
+                    if (this.debugval.privatekeys.length) {
+                        var deb='';
+                        for (var k = 0; k < this.circles; k++) {
+                            deb +="odd plus "+k+" : "+this.debugval.privatekeys[k][(randposition % 2 ? randposition : (randposition == 0 ? 1 : randposition - 1  ))]+"<br>";
+                        }
+                        this.writedebug(deb);
+                    }
+                }
             }
         }
-
+        if (this.debug) { this.writedebug("plus sum "+sum); }
 
         //minus
         var randminus = Math.floor(Math.random() * (this.maxminus - this.minminus)) + this.minminus;
-     //   console.log("randminus " + randminus);
-
+        if (this.debug) { this.writedebug("randminus "+randminus); }
         for (var i = 0; i < randminus; i++) {
             var randposition = Math.floor(Math.random() * (this.keyLen - 1));
             var pp = this.openkey[(randposition % 2 ? randposition - 1 : randposition)];
-            sum += pp;
-         //   console.log("even minus " + pp + " pos "+(randposition % 2 ? randposition - 1 : randposition)+" private " + this.initprivatekey[(randposition % 2 ? randposition - 1 : randposition)]);
-
-
-        }
+            sum -= pp;
+            if (this.debug) {
+                if (this.debugval.privatekeys.length) {
+                    var deb='';
+                    for (var k = 0; k < this.circles; k++) {
+                        deb +="even minus "+k+" : "+this.debugval.privatekeys[k][(randposition % 2 ? randposition - 1 : randposition)]+"<br>";
+                    }
+                    this.writedebug(deb);
+                }
+            }
+            }
+        if (this.debug) { this.writedebug("sum "+sum); }
         return sum;
     }
 };
 
 Codered.prototype.decode = function (data) {
     var tdata = data;
-    for (var i = this.circles-1; i>=0; i--) {
+    for (var i = this.circles - 1; i >= 0; i--) {
         tdata = tdata * this.privatekey.invert[i] % this.privatekey.q[i];
-      //  console.log("tdata"+i+" " + tdata);
     }
     return (tdata % 2 ? 1 : 0);
 };
