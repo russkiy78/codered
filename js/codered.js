@@ -121,30 +121,38 @@ Codered.prototype.encode = function (bit) {
 
 
         var randplus = Math.floor(Math.random() * (this.maxplus - this.minplus)) + this.minplus;
-        if (this.debug) { this.writedebug("randplus "+randplus); }
+        if (this.debug) {
+            this.writedebug("randplus " + randplus);
+        }
 
         //plus
         var oddcount = Math.floor(Math.random() * randplus);
 
         oddcount = (bit == 1 ? (oddcount % 2 ? oddcount : oddcount + (Math.floor(Math.random() * 2) && oddcount > 0 ? -1 : 1)) :
             (oddcount % 2 ? oddcount + (Math.floor(Math.random() * 2) && oddcount > 0 ? -1 : 1) : oddcount ));
-        if (this.debug) { this.writedebug("oddcount "+oddcount); }
+        if (this.debug) {
+            this.writedebug("oddcount " + oddcount);
+        }
         var evencount = randplus - oddcount;
-        if (this.debug) { this.writedebug("evencount "+evencount); }
+        if (this.debug) {
+            this.writedebug("evencount " + evencount);
+        }
         var sum = 0;
         /**/
         for (var i = 0; i < randplus; i++) {
             var randposition = Math.floor(Math.random() * (this.keyLen - 1));
-            if (this.debug) { this.writedebug("randposition "+randposition); }
+            if (this.debug) {
+                this.writedebug("randposition " + randposition);
+            }
             if (evencount > 0) {
                 var pp = this.openkey[(randposition % 2 ? randposition - 1 : randposition)];
                 sum += pp;
-               evencount--;
+                evencount--;
                 if (this.debug) {
                     if (this.debugval.privatekeys.length) {
-                        var deb='';
+                        var deb = '';
                         for (var k = 0; k < this.circles; k++) {
-                           deb +="even plus "+k+" : "+this.debugval.privatekeys[k][(randposition % 2 ? randposition - 1 : randposition)]+"<br>";
+                            deb += "even plus " + k + " : " + this.debugval.privatekeys[k][(randposition % 2 ? randposition - 1 : randposition)] + "<br>";
                         }
                         this.writedebug(deb);
                     }
@@ -152,38 +160,52 @@ Codered.prototype.encode = function (bit) {
             } else {
                 var pp = this.openkey[(randposition % 2 ? randposition : (randposition == 0 ? 1 : randposition - 1  ))];
                 sum += pp;
-               oddcount--;
+                oddcount--;
                 if (this.debug) {
                     if (this.debugval.privatekeys.length) {
-                        var deb='';
+                        var deb = '';
                         for (var k = 0; k < this.circles; k++) {
-                            deb +="odd plus "+k+" : "+this.debugval.privatekeys[k][(randposition % 2 ? randposition : (randposition == 0 ? 1 : randposition - 1  ))]+"<br>";
+                            deb += "odd plus " + k + " : " + this.debugval.privatekeys[k][(randposition % 2 ? randposition : (randposition == 0 ? 1 : randposition - 1  ))] + "<br>";
                         }
                         this.writedebug(deb);
                     }
                 }
             }
+            if (this.debug) {
+                this.writedebug("plus sum " + sum);
+            }
         }
-        if (this.debug) { this.writedebug("plus sum "+sum); }
+
 
         //minus
         var randminus = Math.floor(Math.random() * (this.maxminus - this.minminus)) + this.minminus;
-        if (this.debug) { this.writedebug("randminus "+randminus); }
+        if (this.debug) {
+            this.writedebug("randminus " + randminus);
+        }
         for (var i = 0; i < randminus; i++) {
             var randposition = Math.floor(Math.random() * (this.keyLen - 1));
             var pp = this.openkey[(randposition % 2 ? randposition - 1 : randposition)];
-            sum -= pp;
-            if (this.debug) {
-                if (this.debugval.privatekeys.length) {
-                    var deb='';
-                    for (var k = 0; k < this.circles; k++) {
-                        deb +="even minus "+k+" : "+this.debugval.privatekeys[k][(randposition % 2 ? randposition - 1 : randposition)]+"<br>";
+            if (sum - pp > 0) {
+                sum -= pp;
+                if (this.debug) {
+                    if (this.debugval.privatekeys.length) {
+                        var deb = '';
+                        for (var k = 0; k < this.circles; k++) {
+                            deb += "even minus " + k + " : " + this.debugval.privatekeys[k][(randposition % 2 ? randposition - 1 : randposition)] + "<br>";
+                        }
+                        this.writedebug(deb);
                     }
-                    this.writedebug(deb);
+                }
+            } else {
+                if (this.debug) {
+                    this.writedebug("minus - ignore");
                 }
             }
-            }
-        if (this.debug) { this.writedebug("sum "+sum); }
+
+        }
+        if (this.debug) {
+            this.writedebug("sum " + sum);
+        }
         return sum;
     }
 };

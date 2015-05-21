@@ -32,9 +32,9 @@ $(document).ready(function () {
                   }
 
               }
-              $("#debugrow").html("<p>"+time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds()+" : "+output+"</p>"+$("#debugrow").html());
+              $("#debugrow").prepend("<p>"+time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds()+" : "+output+"</p>");
           } else {
-              $("#debugrow").html("<p>"+time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds()+" : "+text+"</p>"+$("#debugrow").html());
+              $("#debugrow").prepend("<p>"+time.getHours() + ":" + time.getMinutes() + ":" + time.getSeconds()+" : "+text+"</p>");
           }
 
       }
@@ -84,7 +84,7 @@ $(document).ready(function () {
         var recstr ='';
         var maxbitlen=0
 
-
+        if (code.debug) { code.writedebug ("<b>Start!</b>"); }
         try {
             for (var i = 0; i < sendstr.length; i++) {
                 var binstr=sendstr.charCodeAt(i).toString(2);
@@ -92,6 +92,7 @@ $(document).ready(function () {
                 datastr[i] = [];
                 var trecstr='';
                 for (var j = 0; j < binstr.length; j++) {
+                    if (code.debug) { code.writedebug ("<b>next bit: " +binstr[j]+" </b>"); }
                     datastr[i][j]=code.encode(parseInt(binstr[j]));
                     trecstr+=code.decode(datastr[i][j]);
                     maxbitlen=(maxbitlen < datastr[i][j].toString(2).length ?  datastr[i][j].toString(2).length : maxbitlen  );
@@ -99,7 +100,7 @@ $(document).ready(function () {
                 htmlstr+="<p>"+datastr[i].join(', ')+"</p>";
                 recstr+=String.fromCharCode(parseInt(trecstr,2));
                 if (String.fromCharCode(parseInt(trecstr,2)) !== sendstr[i]) {
-                    code.writedebug("Send and receive symbol  do not match!");
+                    code.writedebug("Send ("+sendstr[i]+") and receive ("+String.fromCharCode(parseInt(trecstr,2))+") symbol  do not match!");
                 }
             }
         } catch (err) {
@@ -111,7 +112,7 @@ $(document).ready(function () {
             if (code.debug) { alert ("Send symbol and receive symbol do not match!"); }
          }
         $("#data").html("maxbitlen: "+maxbitlen+htmlstr);
-        $("#receive").html(recstr);
+        $("#receive").html('<pre>'+recstr+'</pre>');
 
     });
 
