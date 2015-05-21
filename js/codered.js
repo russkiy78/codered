@@ -6,25 +6,41 @@
 function Codered() {
 
     /* init const */
-    this.keyLen = 6;
-    this.circles = 1;
-    this.maxq = 100;
-    this.minr = 10;
+    this.keyLen = 100;
+    this.circles = 2;
+    this.maxq = 10;
+    this.minr = 100;
+
+    this.maxplus = 12;
+    this.minplus = 10;
+
+    this.maxminus = 3;
+    this.minminus = 2;
+
 
     /* private key */
     this.initprivatekey = [];
     this.privatekey = {
-        q: new Array (this.circles),
-        r: new Array (this.circles),
-        invert: new Array (this.circles)
+        q: new Array(this.circles),
+        r: new Array(this.circles),
+        invert: new Array(this.circles)
     };
     /* open key */
     this.openkey = new Uint32Array(this.keyLen);
-    this.maxplusminus=3;
-    this.minplusminus=1;
+
 }
 
 Codered.prototype.createKey = function () {
+
+    /* private key */
+    this.initprivatekey = [];
+    this.privatekey = {
+        q: new Array(this.circles),
+        r: new Array(this.circles),
+        invert: new Array(this.circles)
+    };
+    /* open key */
+    this.openkey = new Uint32Array(this.keyLen);
 
     var cryptoObj = window.crypto || window.msCrypto;
 
@@ -52,7 +68,7 @@ Codered.prototype.createKey = function () {
 
     for (var i = 0; i < this.circles; i++) {
 
-        this.privatekey.q[i] = this.nextPrime(Math.max.apply(null, this.openkey) * 2, Math.floor(Math.random() * this.maxq));
+        this.privatekey.q[i] = this.nextPrime((Math.max.apply(null, this.openkey) * this.maxplus) - (Math.min.apply(null, this.openkey) * this.maxminus), Math.floor(Math.random() * this.maxq));
         this.privatekey.r[i] = Math.floor(Math.random() * (this.privatekey.q[i] - this.minr)) + this.minr
         this.privatekey.invert[i] = this.getInvert(this.privatekey.r[i], this.privatekey.q[i]);
         for (var j = 0; j < this.keyLen; j++) {
@@ -61,69 +77,68 @@ Codered.prototype.createKey = function () {
     }
 };
 
-Codered.prototype.encode  = function (bit) {
-    if (this.openkey.length ==this.keyLen && (bit==1 || bit==0) ) {
-      //  var rand_cycles=Math.floor(Math.random() * (this.maxplusminus - this.minplusminus)) + this.minplusminus;
-        var plus=0;
-        var minus=0;
-        //var evencount=Math.floor(Math.random() * (this.maxplusminus - this.minplusminus)) + this.minplusminus;
-
-        var evencount=Math.floor(Math.random() * (this.maxplusminus - this.minplusminus)) + this.minplusminus;
-        evencount =(bit==1 ? (evencount % 2 ?   evencount : evencount + (Math.floor(Math.random() * 2) ? -1 : 1)) :
-            (evencount % 2 ?   evencount + (Math.floor(Math.random() * 2) ? -1 : 1) : evencount ));
-
-        var oddcount=Math.floor(Math.random() * (this.maxplusminus - this.minplusminus)) + this.minplusminus;
-        oddcount =(bit==1 ? (oddcount % 2 ?   oddcount : oddcount + (Math.floor(Math.random() * 2) ? -1 : 1)) :
-            (oddcount % 2 ?   oddcount + (Math.floor(Math.random() * 2) ? -1 : 1) : oddcount ));
+Codered.prototype.encode = function (bit) {
+    if (this.openkey.length == this.keyLen && (bit == 1 || bit == 0)) {
 
 
-     console.log("evencount "+evencount);
-     console.log("oddcount "+oddcount);
-        var allcount=(evencount+oddcount);
+        var randplus = Math.floor(Math.random() * (this.maxplus - this.minplus)) + this.minplus;
+     //   console.log("randplus " + randplus);
+
 
         //plus
-        for (var i = 0; i < allcount ; i++) {
-            var randposition=Math.floor(Math.random() * (this.keyLen - 1));
-            if (i % 2) {
-                    if (evencount>0) {
-                        var pp=this.openkey[(randposition % 2 ? randposition-1 : randposition)];
-                        plus+=pp;
-                        console.log("even plus "+pp);
-                        evencount--;
-                    } else if (oddcount>0) {
-                        var pp=this.openkey[(randposition % 2 ?  randposition : (randposition == 0 ? 1 : randposition-1  ))];
-                        plus+=pp;
-                        console.log("odd plus "+pp);
-                        oddcount--;
-                    }
+        var oddcount = Math.floor(Math.random() * randplus);
+
+        oddcount = (bit == 1 ? (oddcount % 2 ? oddcount : oddcount + (Math.floor(Math.random() * 2) && oddcount>0 ? -1 : 1)) :
+            (oddcount % 2 ? oddcount + (Math.floor(Math.random() * 2) && oddcount>0 ? -1 : 1) : oddcount ));
+        var evencount = randplus - oddcount;
+
+
+     //   console.log("evencount " + evencount);
+    //    console.log("oddcount " + oddcount);
+
+        var sum = 0;
+
+
+        for (var i = 0; i < randplus; i++) {
+            var randposition = Math.floor(Math.random() * (this.keyLen - 1));
+            if (evencount > 0) {
+                var pp = this.openkey[(randposition % 2 ? randposition - 1 : randposition)];
+                sum += pp;
+             //   console.log("even plus " + pp + " pos "+(randposition % 2 ? randposition - 1 : randposition)+" private " + this.initprivatekey[(randposition % 2 ? randposition - 1 : randposition)]);
+                evencount--;
             } else {
-                if (evencount>0) {
-                    var mm=this.openkey[(randposition % 2 ? randposition-1 : randposition)];
-                    minus+=mm;
-                    evencount--;
-                    console.log("even minus "+mm);
-                } else if (oddcount>0) {
-                    var mm=this.openkey[(randposition % 2 ?  randposition : (randposition == 0 ? 1 : randposition-1  ))];
-                    minus+=mm;
-                    console.log("odd minus "+mm);
-                    oddcount--;
-                }
+                var pp = this.openkey[(randposition % 2 ? randposition : (randposition == 0 ? 1 : randposition - 1  ))];
+                sum += pp;
+             //   console.log("odd plus " + pp + " pos "+(randposition % 2 ? randposition : (randposition == 0 ? 1 : randposition - 1  ))+" private " + this.initprivatekey[(randposition % 2 ? randposition : (randposition == 0 ? 1 : randposition - 1  ))]);
+                oddcount--;
             }
         }
 
-        return (plus-minus);
+
+        //minus
+        var randminus = Math.floor(Math.random() * (this.maxminus - this.minminus)) + this.minminus;
+     //   console.log("randminus " + randminus);
+
+        for (var i = 0; i < randminus; i++) {
+            var randposition = Math.floor(Math.random() * (this.keyLen - 1));
+            var pp = this.openkey[(randposition % 2 ? randposition - 1 : randposition)];
+            sum += pp;
+         //   console.log("even minus " + pp + " pos "+(randposition % 2 ? randposition - 1 : randposition)+" private " + this.initprivatekey[(randposition % 2 ? randposition - 1 : randposition)]);
+
+
+        }
+        return sum;
     }
 };
 
-Codered.prototype.decode  = function (data) {
-    var tdata=data;
-    for (var i = 0; i < this.circles ; i++) {
-        tdata=tdata*this.privatekey.invert[i] % this.privatekey.q[i];
+Codered.prototype.decode = function (data) {
+    var tdata = data;
+    for (var i = this.circles-1; i>=0; i--) {
+        tdata = tdata * this.privatekey.invert[i] % this.privatekey.q[i];
+      //  console.log("tdata"+i+" " + tdata);
     }
-    console.log("tdata "+tdata);
     return (tdata % 2 ? 1 : 0);
 };
-
 
 Codered.prototype.getInvert = function (a, b) {
     var res = this.Euclide(a, b);
