@@ -64,7 +64,7 @@ $(document).ready(function () {
 
         }
         if (recstr !== sendstr) {
-            alert ("error!");
+            alert ("Send symbol and receive symbol do not match!");
         }
         $("#data").html("maxbitlen: "+maxbitlen+htmlstr);
         $("#receive").html(recstr);
