@@ -41,20 +41,12 @@ $(document).ready(function () {
 
     });
 
-
-    var prevdata='';
-    $('#send').on("change",function () {
-        var sendstr=$('#send').val();
-        console.log(sendstr);
-    });
-
-
     $("#sendbut").on("click",function () {
         var datastr= [];
         var sendstr=$('#send').val();
-
         var htmlstr='';
         var recstr ='';
+        var maxbitlen=0
 
         for (var i = 0; i < sendstr.length; i++) {
             var binstr=sendstr.charCodeAt(i).toString(2);
@@ -62,8 +54,9 @@ $(document).ready(function () {
             var trecstr='';
             for (var j = 0; j < binstr.length; j++) {
                 datastr[i][j]=code.encode(parseInt(binstr[j]));
-             //  console.log("from "+binstr[j]+" to"+code.decode(datastr[i][j]));
-                trecstr+=code.decode(datastr[i][j]);
+                 trecstr+=code.decode(datastr[i][j]);
+                maxbitlen=(maxbitlen < datastr[i][j].toString(2).length ?  datastr[i][j].toString(2).length : maxbitlen  );
+              //  console.log(datastr[i][j].toString(2).length);
             }
             htmlstr+="<p>"+datastr[i].join(', ')+"</p>";
 
@@ -73,7 +66,7 @@ $(document).ready(function () {
         if (recstr !== sendstr) {
             alert ("error!");
         }
-        $("#data").html(htmlstr);
+        $("#data").html("maxbitlen: "+maxbitlen+htmlstr);
         $("#receive").html(recstr);
 
     });

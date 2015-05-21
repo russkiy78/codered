@@ -7,12 +7,12 @@ function Codered() {
 
     /* init const */
     this.keyLen = 100;
-    this.circles = 2;
+    this.circles = 3;
     this.maxq = 10;
     this.minr = 100;
 
-    this.maxplus = 12;
-    this.minplus = 10;
+    this.maxplus = 10;
+    this.minplus = 8;
 
     this.maxminus = 3;
     this.minminus = 2;
