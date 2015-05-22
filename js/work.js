@@ -12,9 +12,7 @@ $(document).ready(function () {
         " maxq=" + code.maxq + "<br>" +
         " minr=" + code.minr + "<br>" +
         " maxplus=" + code.maxplus + "<br>" +
-        " minplus=" + code.minplus + "<br>" +
-        " maxminus=" + code.maxminus + "<br>" +
-        " minminus=" + code.minminus + "</p>");
+        " minplus=" + code.minplus + "<br>" + "</p>");
     if (code.debug) { $('#debug') .prop('checked', true); }
     else { $('#debug') .prop('checked', false);  }
 
@@ -46,7 +44,7 @@ $(document).ready(function () {
         $('#genkey').prop('gen', 0);
         if (code.debug) { code.writedebug(code); }
         if (res) {
-            $('#openkey').html(code.openkey.join(', '));
+            $('#openkey').val(code.openkey.join(', '));
             $('#privatekey').html("<p>q=" + code.privatekey.q.join(', ') + "</p>" +
                 "<p>r=" + code.privatekey.r.join(', ') + "</p>");
             $('#sendreceive').show();
@@ -85,16 +83,20 @@ $(document).ready(function () {
         var maxbitlen=0
 
         if (code.debug) { code.writedebug ("<b>Start!</b>"); }
-        try {
+
             for (var i = 0; i < sendstr.length; i++) {
                 var binstr=sendstr.charCodeAt(i).toString(2);
                 if (code.debug) { code.writedebug("binstr "+binstr); }
                 datastr[i] = [];
                 var trecstr='';
                 for (var j = 0; j < binstr.length; j++) {
-                    if (code.debug) { code.writedebug ("<b>next bit: " +binstr[j]+" </b>"); }
+                    if (code.debug)  code.writedebug ("<b>next bit: " +binstr[j]+" </b>");
                     datastr[i][j]=code.encode(parseInt(binstr[j]));
-                    trecstr+=code.decode(datastr[i][j]);
+
+                    //decode
+                    var decoded=code.decode(datastr[i][j]);
+                    if (code.debug) code.writedebug("<b>decode bit</b> "+decoded);
+                    trecstr+=decoded;
                     maxbitlen=(maxbitlen < datastr[i][j].toString(2).length ?  datastr[i][j].toString(2).length : maxbitlen  );
                 }
                 htmlstr+="<p>"+datastr[i].join(', ')+"</p>";
@@ -103,9 +105,7 @@ $(document).ready(function () {
                     code.writedebug("Send ("+sendstr[i]+") and receive ("+String.fromCharCode(parseInt(trecstr,2))+") symbol  do not match!");
                 }
             }
-        } catch (err) {
-            code.writedebug('error!');
-        }
+
 
 
         if (recstr !== sendstr) {
