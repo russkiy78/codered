@@ -46,7 +46,8 @@ $(document).ready(function () {
         if (res) {
             $('#openkey').val(code.openkey.join(', '));
             $('#privatekey').html("<p>q=" + code.privatekey.q.join(', ') + "</p>" +
-                "<p>r=" + code.privatekey.r.join(', ') + "</p>");
+                "<p>r=" + code.privatekey.r.join(', ') + "</p>"+
+                "<p>invert=" + code.privatekey.invert.join(', ') + "</p>");
             $('#sendreceive').show();
         }
 

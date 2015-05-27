@@ -13,8 +13,8 @@ function Codered() {
     this.maxq = 10;
     this.minr = 1000;
 
-    this.maxplus = 40;
-    this.minplus = 20;
+    this.maxplus = 10;
+    this.minplus = 5;
 
 
   //  this.maxminus = 2;
@@ -39,6 +39,7 @@ function Codered() {
     this.evensorted = new Array()
 
 }
+
 Codered.prototype.writedebug = function (text) {
     console.log(text);
 };
@@ -96,9 +97,12 @@ Codered.prototype.createKey = function () {
         for (var i = 0; i < this.circles; i++) {
 
             if (this.debug) this.writedebug("maxplus q " + Math.max.apply(null, this.openkey) * this.maxplus);
-                this.privatekey.q[i] = this.nextPrime(Math.max.apply(null, this.openkey) * this.maxplus , Math.floor(Math.random() * this.maxq));
-            this.privatekey.r[i] = Math.floor(Math.random() * (this.privatekey.q[i] - this.minr)) + this.minr
+
+            this.privatekey.q[i] = this.nextPrime(Math.max.apply(null, this.openkey) * this.maxplus , Math.floor(Math.random() * this.maxq));
+            this.privatekey.r[i] = Math.floor(Math.random() * (Math.floor(this.privatekey.q[i]) - this.minr)) + this.minr
             this.privatekey.invert[i] = this.getInvert(this.privatekey.r[i], this.privatekey.q[i]);
+
+
             for (var j = 0; j < this.keyLen; j++) {
                 this.openkey[j] = this.openkey[j] * this.privatekey.r[i] % this.privatekey.q[i];
                 if (this.openkey[j] == 0) {
@@ -158,6 +162,7 @@ Codered.prototype.encode = function (bit) {
                 if (this.debug) {
                     if (this.debugval.privatekeys.length) {
                         var deb = '';
+                        if (this.debug)  this.writedebug("even plus  " + pp);
                         for (var k = 0; k < this.circles; k++) {
                             deb += "even plus " + k + " : " + this.debugval.privatekeys[k][(randposition % 2 ? randposition - 1 : randposition)] + "<br>";
                         }
@@ -171,6 +176,7 @@ Codered.prototype.encode = function (bit) {
                 if (this.debug) {
                     if (this.debugval.privatekeys.length) {
                         var deb = '';
+                        if (this.debug)  this.writedebug("odd plus  " + pp);
                         for (var k = 0; k < this.circles; k++) {
                             deb += "odd plus " + k + " : " + this.debugval.privatekeys[k][(randposition % 2 ? randposition : (randposition == 0 ? 1 : randposition - 1  ))] + "<br>";
                         }
@@ -184,16 +190,12 @@ Codered.prototype.encode = function (bit) {
 
         var minus = this.findMaxInSortedArray(this.evensorted, sum);
         var minuscounter=0;
-
-        if (this.debug)  this.writedebug("minus " + minus);
-
-        while (minus ) {
+        do {
             minuscounter++;
             sum-=minus;
             if (this.debug)  this.writedebug("minus " + minus);
             minus = this.findMaxInSortedArray(this.evensorted, sum);
-
-        }
+        } while (minus);
 
         if (this.debug)  this.writedebug("minuscounter " + minuscounter);
 /*
@@ -235,19 +237,20 @@ Codered.prototype.decode = function (data) {
     var tdata = data;
 
     for (var i = 0; i < Math.floor(this.maxplus/3); i++) {
-
-
-
-
-      //  var rand=Math.floor(Math.random() * (this.evensorted.length - 1));
+        if (tdata+this.evensorted[this.evensorted.length-1]>=this.privatekey.q[this.privatekey.q.length-1]) {
+            if (this.debug) this.writedebug("<b>stop!</b> " +i);
+            break;
+        }
          if (this.debug) this.writedebug("decode plus " +i);
         tdata+=this.evensorted[this.evensorted.length-1];
     }
     if (this.debug) this.writedebug("tdata " + tdata);
 
     for (var i = this.circles - 1; i >= 0; i--) {
+        if (this.debug) this.writedebug("decode step "+i+" " + tdata + " * " +  this.privatekey.invert[i] + "("+(tdata * this.privatekey.invert[i])+")" + " % "+this.privatekey.q[i] + " = "+
+            (tdata * this.privatekey.invert[i] % this.privatekey.q[i]));
         tdata = tdata * this.privatekey.invert[i] % this.privatekey.q[i];
-        if (this.debug) this.writedebug("decode step "+i+" " + tdata);
+
     }
     return (tdata % 2 ? 1 : 0);
 };
