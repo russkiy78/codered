@@ -4,21 +4,24 @@
 "use strict";
 
 function Codered() {
- this.init(true);
+    this.init(true);
 };
 
 Codered.prototype.init = function (clearconst) {
     /* init const */
-    if (clearconst)  {
+    if (clearconst) {
 
         this.debug = false;
         this.keyLen = 1000;
-        this.circles = 4;
+        this.circles = 3;
         this.maxq = 10;
         this.minr = 1000;
 
         this.maxplus = 10;
         this.minplus = 5;
+
+        this.decodeplus = 10;
+        this.minimize = true;
     }
 
     /*debug values*/
@@ -39,7 +42,6 @@ Codered.prototype.init = function (clearconst) {
     this.openkey = new Uint32Array(this.keyLen);
     this.evensorted = new Array();
 };
-
 
 Codered.prototype.writedebug = function (text) {
     console.log(text);
@@ -102,10 +104,9 @@ Codered.prototype.createKey = function () {
 
             if (this.debug) this.writedebug("maxplus q " + Math.max.apply(null, this.openkey) * this.maxplus);
 
-            this.privatekey.q[i] = this.nextPrime(Math.max.apply(null, this.openkey) * this.maxplus*2 , Math.floor(Math.random() * this.maxq));
+            this.privatekey.q[i] = this.nextPrime(Math.max.apply(null, this.openkey) * this.maxplus * 2, Math.floor(Math.random() * this.maxq));
             this.privatekey.r[i] = Math.floor(Math.random() * (Math.floor(this.privatekey.q[i]) - this.minr)) + this.minr
             this.privatekey.invert[i] = this.getInvert(this.privatekey.r[i], this.privatekey.q[i]);
-
 
             for (var j = 0; j < this.keyLen; j++) {
                 this.openkey[j] = this.openkey[j] * this.privatekey.r[i] % this.privatekey.q[i];
@@ -124,7 +125,9 @@ Codered.prototype.createKey = function () {
     for (var i = 0; i < this.keyLen; i += 2) {
         this.evensorted.push(this.openkey[i]);
     }
-    this.evensorted = this.evensorted.sort(function(a, b) {  return a - b;  });
+    this.evensorted = this.evensorted.sort(function (a, b) {
+        return a - b;
+    });
 
     return true;
 
@@ -132,7 +135,6 @@ Codered.prototype.createKey = function () {
 
 Codered.prototype.encode = function (bit) {
 
-    if (this.debug) var privatesum=0;
 
     if (this.openkey.length == this.keyLen && (bit == 1 || bit == 0)) {
 
@@ -192,44 +194,24 @@ Codered.prototype.encode = function (bit) {
 
         }
 
-        var minus = this.findMaxInSortedArray(this.evensorted, sum);
-        var minuscounter=0;
-        do {
-            minuscounter++;
-            sum-=minus;
-            if (this.debug)  this.writedebug("minus " + minus + " in privkey "+  this.debugval.privatekeys[0][ this.openkey.indexOf(minus)] + " sum "+sum);
-            minus = this.findMaxInSortedArray(this.evensorted, sum);
-        } while (minus);
+        if (this.minimize) {
+
+            var minus = this.findMaxInSortedArray(this.evensorted, sum);
+            var minuscounter = 0;
+            do {
+                if (sum - minus <= 0) {
+                    break;
+                }
+                minuscounter++;
+                sum -= minus;
+                if (this.debug)  this.writedebug("minus " + minus + " in privkey " + this.debugval.privatekeys[0][this.openkey.indexOf(minus)] + " sum " + sum);
+                minus = this.findMaxInSortedArray(this.evensorted, sum);
+            } while (minus);
+
+        }
 
         if (this.debug)  this.writedebug("minuscounter " + minuscounter);
-/*
-        //minus
-        var randminus = Math.floor(Math.random() * (this.maxminus - this.minminus)) + this.minminus;
-        if (this.debug) {
-            this.writedebug("randminus " + randminus);
-        }
-        for (var i = 0; i < randminus; i++) {
-            var randposition = Math.floor(Math.random() * (this.keyLen - 1));
-            var pp = this.openkey[(randposition % 2 ? randposition - 1 : randposition)];
-            if (sum - pp > 0) {
-                sum -= pp;
-                if (this.debug) {
-                    if (this.debugval.privatekeys.length) {
-                        var deb = '';
-                        for (var k = 0; k < this.circles; k++) {
-                            deb += "even minus " + k + " : " + this.debugval.privatekeys[k][(randposition % 2 ? randposition - 1 : randposition)] + "<br>";
-                        }
-                        this.writedebug(deb);
-                    }
-                }
-            } else {
-                if (this.debug) {
-                    this.writedebug("minus - ignore");
-                }
-            }
 
-        }
-*/
         //end
         if (this.debug)  this.writedebug("sum " + sum);
         return sum;
@@ -239,15 +221,18 @@ Codered.prototype.encode = function (bit) {
 Codered.prototype.decode = function (data) {
 
     var tdata = data;
-
-    for (var i = 0; i < this.maxplus; i++) {
-         if (this.debug) this.writedebug("decode plus " +i );
-        tdata+=this.evensorted[Math.floor(Math.random() * (this.evensorted.length-1))];
+    /**/
+    if (this.minimize) {
+        for (var i = 0; i < this.decodeplus; i++) {
+            if (this.debug) this.writedebug("decode plus " + i);
+            tdata += this.evensorted[Math.floor(Math.random() * (this.evensorted.length - 1))];
+        }
     }
+
     if (this.debug) this.writedebug("tdata " + tdata);
 
     for (var i = this.circles - 1; i >= 0; i--) {
-        if (this.debug) this.writedebug("decode step "+i+" " + tdata + " * " +  this.privatekey.invert[i] + "("+(tdata * this.privatekey.invert[i])+")" + " % "+this.privatekey.q[i] + " = "+
+        if (this.debug) this.writedebug("decode step " + i + " " + tdata + " * " + this.privatekey.invert[i] + "(" + (tdata * this.privatekey.invert[i]) + ")" + " % " + this.privatekey.q[i] + " = " +
             (tdata * this.privatekey.invert[i] % this.privatekey.q[i]));
         tdata = tdata * this.privatekey.invert[i] % this.privatekey.q[i];
 

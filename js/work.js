@@ -1,18 +1,67 @@
 /**
  * Created by russkiy on 08.05.15.
  */
-
+var code;
 $(document).ready(function () {
-    var code = new Codered();
+     code = new Codered();
+
+    $('#keyLen').val(code.keyLen);
+    $('#circles').val(code.circles);
+    $('#maxq').val(code.maxq);
+    $('#minr').val(code.minr);
+    $('#maxplus').val(code.maxplus);
+    $('#minplus').val(code.minplus);
+    $('#decodeplus').val(code.decodeplus);
 
 
-    //
-    $("#keyparam").html(" <p>keyLen=" + code.keyLen + "<br>" +
-        " circles=" + code.circles + "<br>" +
-        " maxq=" + code.maxq + "<br>" +
-        " minr=" + code.minr + "<br>" +
-        " maxplus=" + code.maxplus + "<br>" +
-        " minplus=" + code.minplus + "<br>" + "</p>");
+    $('#keyLen').on("change",function () {
+         if (!isNaN(parseInt($(this).val()))  && parseInt($(this).val())>0) {
+             code.keyLen=parseInt($(this).val());
+         }
+    });
+    $('#circles').on("change",function () {
+        if (!isNaN(parseInt($(this).val()))  && parseInt($(this).val())>0) {
+            code.circles=parseInt($(this).val());
+        }
+    });
+    $('#maxq').on("change",function () {
+        if (!isNaN(parseInt($(this).val()))  && parseInt($(this).val())>0) {
+            code.maxq=parseInt($(this).val());
+        }
+    });
+    $('#minr').on("change",function () {
+        if (!isNaN(parseInt($(this).val()))  && parseInt($(this).val())>0) {
+            code.minr=parseInt($(this).val());
+        }
+    });
+    $('#maxplus').on("change",function () {
+        if (!isNaN(parseInt($(this).val()))  && parseInt($(this).val())>0) {
+            code.maxplus=parseInt($(this).val());
+        }
+    });
+    $('#minplus').on("change",function () {
+        if (!isNaN(parseInt($(this).val()))  && parseInt($(this).val())>0) {
+            code.minplus=parseInt($(this).val());
+        }
+    });
+    $('#decodeplus').on("change",function () {
+        if (!isNaN(parseInt($(this).val()))  && parseInt($(this).val())>0) {
+            code.decodeplus=parseInt($(this).val());
+        }
+    });
+    $('#minimize').on("change",function () {
+        if ($('#minimize') .prop('checked')){
+            code.minimize=true;
+        } else {
+            code.minimize=false;
+        }
+
+    });
+
+    if (code.minimize) { $('#minimize') .prop('checked', true); }
+    else { $('#minimize') .prop('checked', false);  }
+
+
     if (code.debug) { $('#debug') .prop('checked', true); }
     else { $('#debug') .prop('checked', false);  }
 
@@ -39,6 +88,8 @@ $(document).ready(function () {
   };
 
     function creanekey() {
+
+
         var res = code.createKey();
         $('#genkey').toggleClass('active');
         $('#genkey').prop('gen', 0);
@@ -51,7 +102,16 @@ $(document).ready(function () {
             $('#sendreceive').show();
         }
 
+        $('#keyLen').val(code.keyLen);
+        $('#circles').val(code.circles);
+        $('#maxq').val(code.maxq);
+        $('#minr').val(code.minr);
+        $('#maxplus').val(code.maxplus);
+        $('#minplus').val(code.minplus);
+        $('#decodeplus').val(code.decodeplus);
+
     }
+
     $('#debug').on("change",function () {
         if ($('#debug') .prop('checked')){
             code.debug=true;
@@ -71,6 +131,8 @@ $(document).ready(function () {
             $('#sendreceive').hide();
             $(this).toggleClass('active');
             $(this).prop('gen', 1);
+            $('#openkey').val('');
+            $('#privatekey').html('');
             setTimeout(creanekey, 1000)
         }
 
