@@ -4,28 +4,28 @@
 "use strict";
 
 function Codered() {
+ this.init(true);
+};
 
+Codered.prototype.init = function (clearconst) {
     /* init const */
-    this.debug = false;
+    if (clearconst)  {
 
-    this.keyLen = 1000;
-    this.circles = 2;
-    this.maxq = 10;
-    this.minr = 1000;
+        this.debug = false;
+        this.keyLen = 1000;
+        this.circles = 2;
+        this.maxq = 10;
+        this.minr = 1000;
 
-    this.maxplus = 10;
-    this.minplus = 5;
-
-
-  //  this.maxminus = 2;
-  //  this.minminus = 0;
+        this.maxplus = 10;
+        this.minplus = 5;
+    }
 
     /*debug values*/
     this.debugval = {
         privatekeys: new Array(this.circles)
 
     };
-
 
     /* private key */
     this.initprivatekey = new Array(this.keyLen + 1);
@@ -34,17 +34,21 @@ function Codered() {
         r: new Array(this.circles),
         invert: new Array(this.circles)
     };
+
     /* open key */
     this.openkey = new Uint32Array(this.keyLen);
-    this.evensorted = new Array()
+    this.evensorted = new Array();
+};
 
-}
 
 Codered.prototype.writedebug = function (text) {
     console.log(text);
 };
 
 Codered.prototype.createKey = function () {
+
+    this.init(false);
+
 
     if (this.keyLen % 2) {
         if (this.debug) {

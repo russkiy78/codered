@@ -100,7 +100,7 @@ $(document).ready(function () {
                     trecstr+=decoded;
                     maxbitlen=(maxbitlen < datastr[i][j].toString(2).length ?  datastr[i][j].toString(2).length : maxbitlen  );
                 }
-                htmlstr+="<p>"+datastr[i].join(', ')+"</p>";
+                htmlstr+= datastr[i].join(', ')+"\n";
                 recstr+=String.fromCharCode(parseInt(trecstr,2));
                 if (String.fromCharCode(parseInt(trecstr,2)) !== sendstr[i]) {
                     code.writedebug("Send ("+sendstr[i]+") and receive ("+String.fromCharCode(parseInt(trecstr,2))+") symbol  do not match!");
@@ -112,7 +112,8 @@ $(document).ready(function () {
         if (recstr !== sendstr) {
             if (code.debug) { alert ("Send symbol and receive symbol do not match!"); }
          }
-        $("#data").html("maxbitlen: "+maxbitlen+htmlstr);
+        $("#datamax").html("maxbitlen: "+maxbitlen);
+        $("#data").val( htmlstr);
         $("#receive").html('<pre>'+recstr+'</pre>');
 
     });
