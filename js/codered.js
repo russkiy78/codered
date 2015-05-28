@@ -9,7 +9,7 @@ function Codered() {
     this.debug = false;
 
     this.keyLen = 1000;
-    this.circles = 1;
+    this.circles = 2;
     this.maxq = 10;
     this.minr = 1000;
 
@@ -98,7 +98,7 @@ Codered.prototype.createKey = function () {
 
             if (this.debug) this.writedebug("maxplus q " + Math.max.apply(null, this.openkey) * this.maxplus);
 
-            this.privatekey.q[i] = this.nextPrime(Math.max.apply(null, this.openkey) * this.maxplus , Math.floor(Math.random() * this.maxq));
+            this.privatekey.q[i] = this.nextPrime(Math.max.apply(null, this.openkey) * this.maxplus*2 , Math.floor(Math.random() * this.maxq));
             this.privatekey.r[i] = Math.floor(Math.random() * (Math.floor(this.privatekey.q[i]) - this.minr)) + this.minr
             this.privatekey.invert[i] = this.getInvert(this.privatekey.r[i], this.privatekey.q[i]);
 
@@ -193,7 +193,7 @@ Codered.prototype.encode = function (bit) {
         do {
             minuscounter++;
             sum-=minus;
-            if (this.debug)  this.writedebug("minus " + minus);
+            if (this.debug)  this.writedebug("minus " + minus + " in privkey "+  this.debugval.privatekeys[0][ this.openkey.indexOf(minus)] + " sum "+sum);
             minus = this.findMaxInSortedArray(this.evensorted, sum);
         } while (minus);
 
@@ -236,13 +236,9 @@ Codered.prototype.decode = function (data) {
 
     var tdata = data;
 
-    for (var i = 0; i < Math.floor(this.maxplus/3); i++) {
-        if (tdata+this.evensorted[this.evensorted.length-1]>=this.privatekey.q[this.privatekey.q.length-1]) {
-            if (this.debug) this.writedebug("<b>stop!</b> " +i);
-            break;
-        }
-         if (this.debug) this.writedebug("decode plus " +i);
-        tdata+=this.evensorted[this.evensorted.length-1];
+    for (var i = 0; i < this.maxplus; i++) {
+         if (this.debug) this.writedebug("decode plus " +i );
+        tdata+=this.evensorted[Math.floor(Math.random() * (this.evensorted.length-1))];
     }
     if (this.debug) this.writedebug("tdata " + tdata);
 
