@@ -13,7 +13,7 @@ Codered.prototype.init = function (clearconst) {
 
         this.debug = false;
         this.keyLen = 1000;
-        this.circles = 2;
+        this.circles = 4;
         this.maxq = 10;
         this.minr = 1000;
 
