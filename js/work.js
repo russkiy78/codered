@@ -8,10 +8,12 @@ $(document).ready(function () {
     $('#keyLen').val(code.keyLen);
     $('#circles').val(code.circles);
     $('#maxq').val(code.maxq);
+    $('#qfrommax').val(code.qfrommax);
     $('#minr').val(code.minr);
     $('#maxplus').val(code.maxplus);
     $('#minplus').val(code.minplus);
     $('#decodeplus').val(code.decodeplus);
+
 
 
     $('#keyLen').on("change",function () {
@@ -29,6 +31,12 @@ $(document).ready(function () {
             code.maxq=parseInt($(this).val());
         }
     });
+    $('#qfrommax').on("change",function () {
+        if (!isNaN(parseInt($(this).val()))  && parseInt($(this).val())>0) {
+            code.qfrommax=parseInt($(this).val());
+        }
+    });
+
     $('#minr').on("change",function () {
         if (!isNaN(parseInt($(this).val()))  && parseInt($(this).val())>0) {
             code.minr=parseInt($(this).val());
