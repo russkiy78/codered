@@ -12,7 +12,7 @@ Codered.prototype.init = function (clearconst) {
     if (clearconst) {
 
         this.debug = false;
-        this.keyLen = 1000;
+        this.keyLen = 30000;
         this.circles = 2;
         this.maxq = 10;
         this.qfrommax = 20;
@@ -23,6 +23,10 @@ Codered.prototype.init = function (clearconst) {
 
         this.decodeplus = 10;
         this.minimize = true;
+
+
+        this.maxbitlen=16;
+        this.maxbittrys=50;
     }
 
     /*debug values*/
@@ -139,80 +143,87 @@ Codered.prototype.encode = function (bit) {
 
     if (this.openkey.length == this.keyLen && (bit == 1 || bit == 0)) {
 
-        var randplus = Math.floor(Math.random() * (this.maxplus - this.minplus)) + this.minplus;
+        var count=0;
+        do {
+            count++;
 
-        if (this.debug) this.writedebug("randplus " + randplus);
 
-        //plus
-        var oddcount = Math.floor(Math.random() * randplus);
+            var randplus = Math.floor(Math.random() * (this.maxplus - this.minplus)) + this.minplus;
 
-        oddcount = (bit == 1 ? (oddcount % 2 ? oddcount : oddcount + (Math.floor(Math.random() * 2) && oddcount > 0 ? -1 : 1)) :
-            (oddcount % 2 ? oddcount + (Math.floor(Math.random() * 2) && oddcount > 0 ? -1 : 1) : oddcount ));
+            if (this.debug) this.writedebug("randplus " + randplus);
 
-        if (this.debug) this.writedebug("oddcount " + oddcount);
+            //plus
+            var oddcount = Math.floor(Math.random() * randplus);
 
-        var evencount = randplus - oddcount;
+            oddcount = (bit == 1 ? (oddcount % 2 ? oddcount : oddcount + (Math.floor(Math.random() * 2) && oddcount > 0 ? -1 : 1)) :
+                (oddcount % 2 ? oddcount + (Math.floor(Math.random() * 2) && oddcount > 0 ? -1 : 1) : oddcount ));
 
-        if (this.debug)  this.writedebug("evencount " + evencount);
+            if (this.debug) this.writedebug("oddcount " + oddcount);
 
-        var sum = 0;
-        /**/
-        for (var i = 0; i < randplus; i++) {
-            var randposition = Math.floor(Math.random() * (this.keyLen - 1));
+            var evencount = randplus - oddcount;
 
-            if (this.debug)  this.writedebug("randposition " + randposition);
+            if (this.debug)  this.writedebug("evencount " + evencount);
 
-            if (evencount > 0) {
-                var pp = this.openkey[(randposition % 2 ? randposition - 1 : randposition)];
-                sum += pp;
-                evencount--;
-                if (this.debug) {
-                    if (this.debugval.privatekeys.length) {
-                        var deb = '';
-                        if (this.debug)  this.writedebug("even plus  " + pp);
-                        for (var k = 0; k < this.circles; k++) {
-                            deb += "even plus " + k + " : " + this.debugval.privatekeys[k][(randposition % 2 ? randposition - 1 : randposition)] + "<br>";
+            var sum = 0;
+            /**/
+            for (var i = 0; i < randplus; i++) {
+                var randposition = Math.floor(Math.random() * (this.keyLen - 1));
+
+                if (this.debug)  this.writedebug("randposition " + randposition);
+
+                if (evencount > 0) {
+                    var pp = this.openkey[(randposition % 2 ? randposition - 1 : randposition)];
+                    sum += pp;
+                    evencount--;
+                    if (this.debug) {
+                        if (this.debugval.privatekeys.length) {
+                            var deb = '';
+                            if (this.debug)  this.writedebug("even plus  " + pp);
+                            for (var k = 0; k < this.circles; k++) {
+                                deb += "even plus " + k + " : " + this.debugval.privatekeys[k][(randposition % 2 ? randposition - 1 : randposition)] + "<br>";
+                            }
+                            this.writedebug(deb);
                         }
-                        this.writedebug(deb);
+                    }
+                } else {
+                    var pp = this.openkey[(randposition % 2 ? randposition : (randposition == 0 ? 1 : randposition - 1  ))];
+                    sum += pp;
+                    oddcount--;
+                    if (this.debug) {
+                        if (this.debugval.privatekeys.length) {
+                            var deb = '';
+                            if (this.debug)  this.writedebug("odd plus  " + pp);
+                            for (var k = 0; k < this.circles; k++) {
+                                deb += "odd plus " + k + " : " + this.debugval.privatekeys[k][(randposition % 2 ? randposition : (randposition == 0 ? 1 : randposition - 1  ))] + "<br>";
+                            }
+                            this.writedebug(deb);
+                        }
                     }
                 }
-            } else {
-                var pp = this.openkey[(randposition % 2 ? randposition : (randposition == 0 ? 1 : randposition - 1  ))];
-                sum += pp;
-                oddcount--;
-                if (this.debug) {
-                    if (this.debugval.privatekeys.length) {
-                        var deb = '';
-                        if (this.debug)  this.writedebug("odd plus  " + pp);
-                        for (var k = 0; k < this.circles; k++) {
-                            deb += "odd plus " + k + " : " + this.debugval.privatekeys[k][(randposition % 2 ? randposition : (randposition == 0 ? 1 : randposition - 1  ))] + "<br>";
-                        }
-                        this.writedebug(deb);
-                    }
-                }
+                if (this.debug)  this.writedebug("plus sum " + sum);
+
             }
-            if (this.debug)  this.writedebug("plus sum " + sum);
 
-        }
+            if (this.minimize) {
 
-        if (this.minimize) {
+                var minus = this.findMaxInSortedArray(this.evensorted, sum);
+                var minuscounter = 0;
+                do {
+                    if (sum - minus <= 0) {
+                        break;
+                    }
+                    minuscounter++;
+                    sum -= minus;
+                    if (this.debug)  this.writedebug("minus " + minus + " in privkey " + this.debugval.privatekeys[0][this.openkey.indexOf(minus)] + " sum " + sum);
+                    minus = this.findMaxInSortedArray(this.evensorted, sum);
+                } while (minus);
 
-            var minus = this.findMaxInSortedArray(this.evensorted, sum);
-            var minuscounter = 0;
-            do {
-                if (sum - minus <= 0) {
-                    break;
-                }
-                minuscounter++;
-                sum -= minus;
-                if (this.debug)  this.writedebug("minus " + minus + " in privkey " + this.debugval.privatekeys[0][this.openkey.indexOf(minus)] + " sum " + sum);
-                minus = this.findMaxInSortedArray(this.evensorted, sum);
-            } while (minus);
+            }
 
-        }
+            if (this.debug)  this.writedebug("minuscounter " + minuscounter);
 
-        if (this.debug)  this.writedebug("minuscounter " + minuscounter);
 
+        } while (sum.toString(2).length > this.maxbitlen && count<=this.maxbittrys );
         //end
         if (this.debug)  this.writedebug("sum " + sum);
         return sum;

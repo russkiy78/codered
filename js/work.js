@@ -13,7 +13,8 @@ $(document).ready(function () {
     $('#maxplus').val(code.maxplus);
     $('#minplus').val(code.minplus);
     $('#decodeplus').val(code.decodeplus);
-
+    $('#maxbitlen').val(code.maxbitlen);
+    $('#maxbittrys').val(code.maxbittrys);
 
 
     $('#keyLen').on("change",function () {
@@ -57,6 +58,20 @@ $(document).ready(function () {
             code.decodeplus=parseInt($(this).val());
         }
     });
+    $('#maxbitlen').on("change",function () {
+        if (!isNaN(parseInt($(this).val()))  && parseInt($(this).val())>0) {
+            code.maxbitlen=parseInt($(this).val());
+        }
+    });
+    $('#maxbittrys').on("change",function () {
+        if (!isNaN(parseInt($(this).val()))  && parseInt($(this).val())>0) {
+            code.maxbittrys=parseInt($(this).val());
+        }
+    });
+
+
+
+
     $('#minimize').on("change",function () {
         if ($('#minimize') .prop('checked')){
             code.minimize=true;
@@ -65,6 +80,9 @@ $(document).ready(function () {
         }
 
     });
+
+
+
 
     if (code.minimize) { $('#minimize') .prop('checked', true); }
     else { $('#minimize') .prop('checked', false);  }
@@ -155,8 +173,11 @@ $(document).ready(function () {
 
         if (code.debug) { code.writedebug ("<b>Start!</b>"); }
 
+        $('#indig').html('');
             for (var i = 0; i < sendstr.length; i++) {
+
                 var binstr=sendstr.charCodeAt(i).toString(2);
+                $('#indig').append(binstr+' ');
                 if (code.debug) { code.writedebug("binstr "+binstr); }
                 datastr[i] = [];
                 var trecstr='';

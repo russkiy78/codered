@@ -57,6 +57,17 @@
                     <label for="decodeplus" class="control-label">decodeplus</label>
                     <input type="number" id="decodeplus" name="decodeplus" value="10">
                 </div>
+                <div class="form-group">
+                    <label for="maxbitlen" class="control-label">maxbitlen</label>
+                    <input type="number" id="maxbitlen" name="maxbitlen" value="16">
+                </div>
+                <div class="form-group">
+                    <label for="maxbittrys" class="control-label">maxbittrys</label>
+                    <input type="number" id="maxbittrys" name="maxbittrys" value="50">
+                </div>
+
+
+
                 <div class="checkbox">
                     <label>
                         <input type="checkbox" id="minimize" value="1">
@@ -98,13 +109,13 @@
             <div class="col-md-3 bordered">
                 <h3>Send</h3>
                 <textarea id="send" rows="4" cols="30"></textarea>
-
                 <p>
                     <a id="sendbut" class="btn btn-success has-spinner">
                         <span class="spinner"><i class="fa fa-spinner fa-spin"></i></span>
                         Send
                     </a>
                 </p>
+                <p id="indig"></p>
             </div>
             <div class="col-md-3 bordered">
                 <h3>Transmitted Data</h3>
