@@ -82,14 +82,14 @@ Codered.prototype.createKey = function () {
         var cryptoObj = window.crypto || window.msCrypto;
 
         // create two array - with even and odd digits
-        var matrix_even = new Uint16Array(Math.floor(this.keyLen / 2));
+        var matrix_even = new Uint8Array(Math.floor(this.keyLen / 2));
         cryptoObj.getRandomValues(matrix_even); //  чет
         Array.prototype.forEach.call(matrix_even, function (item, i, arr) {
             arr[i] = (item % 2 ? item + (Math.floor(Math.random() * 2) ? -1 : 1) : item);
         });
 
 
-        var matrix_odd = new Uint16Array(Math.floor(this.keyLen / 2));
+        var matrix_odd = new Uint8Array(Math.floor(this.keyLen / 2));
         cryptoObj.getRandomValues(matrix_odd); // нечет
         Array.prototype.forEach.call(matrix_odd, function (item, i, arr) {
             arr[i] = (item % 2 ? item : item + (Math.floor(Math.random() * 2) ? -1 : 1));
