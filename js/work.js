@@ -2,6 +2,24 @@
  * Created by russkiy on 08.05.15.
  */
 var code;
+
+
+$(document).ready(function () {
+    code = new Codered();
+    code.createKey();
+    console.log(code);
+
+    var str='';
+    for (var i = 0; i < code.keyLen; i++) {
+        str+=code.getRandomInt(0, 1);
+    }
+    console.log("start="+str)
+    console.log("10start="+parseInt(str,2))
+    console.log(code.encode(str));
+
+});
+
+/*
 $(document).ready(function () {
      code = new Codered();
 
@@ -212,3 +230,4 @@ $(document).ready(function () {
 
 });
 
+*/

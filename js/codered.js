@@ -29,6 +29,7 @@ Codered.prototype.init = function (clearconst) {
         this.maxbittrys=50;
     }
 
+
     /*debug values*/
     this.debugval = {
         privatekeys: new Array(this.circles)
