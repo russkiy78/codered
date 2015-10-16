@@ -12,6 +12,7 @@ Codered.prototype.init = function (clearconst) {
     /* init const */
     if (clearconst) {
         this.keyLen = 20;
+        this.minFirst=1024;
         this.maxInitStep = 10;
         this.maxq = 2;
         this.minr = 2;
@@ -36,8 +37,15 @@ Codered.prototype.init = function (clearconst) {
 };
 
 Codered.prototype.createKey = function () {
+
     this.init(false);
     var sum = 0;
+
+  //  var cryptoObj = window.crypto || window.msCrypto;
+  //  var array = new Uint32Array(10);
+  //  cryptoObj.getRandomValues(array);
+  //  console.log(array);
+
     for (var i = 0; i < this.keyLen; i++) {
         var rand = this.getRandomInt(sum + 1, sum + this.maxInitStep);
         this.privatekey.vector.push(rand);

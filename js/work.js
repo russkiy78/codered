@@ -7,8 +7,9 @@ var code;
 $(document).ready(function () {
     code = new Codered();
     code.createKey();
-    console.log(code);
 
+    console.log(code);
+    /*
     var str='';
     for (var i = 0; i < code.keyLen; i++) {
         str+=code.getRandomInt(0, 1);
@@ -16,7 +17,7 @@ $(document).ready(function () {
     console.log("start="+str)
     console.log("10start="+parseInt(str,2))
     console.log(code.encode(str));
-
+*/
 });
 
 /*
