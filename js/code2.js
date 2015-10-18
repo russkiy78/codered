@@ -13,7 +13,7 @@ Codered.prototype.init = function (clearconst) {
     if (clearconst) {
         this.keyLen = 20;
         this.minFirst=1024;
-        this.maxInitStep = 10;
+        this.maxInitStep = 2;
         this.maxq = 2;
         this.minr = 2;
     }
@@ -22,7 +22,10 @@ Codered.prototype.init = function (clearconst) {
     /* private key */
 
     this.privatekey = {
-        vector: new Array(),
+       // vector: new Uint32Array(this.keyLen),
+        vector : new Array(),
+        v_q : new Number(),
+        v_r :  new Number(),
         q: new Array(2),
         r: new Array(2),
         invert: new Array(2)
@@ -39,25 +42,46 @@ Codered.prototype.init = function (clearconst) {
 Codered.prototype.createKey = function () {
 
     this.init(false);
-    var sum = 0;
+
 
   //  var cryptoObj = window.crypto || window.msCrypto;
   //  var array = new Uint32Array(10);
   //  cryptoObj.getRandomValues(array);
   //  console.log(array);
-
+    var sum = 0;
     for (var i = 0; i < this.keyLen; i++) {
-        var rand = this.getRandomInt(sum + 1, sum + this.maxInitStep);
-        this.privatekey.vector.push(rand);
 
+        var rand = this.getRandomInt(sum + 1, sum + this.maxInitStep);
+       // this.privatekey.vector.push(rand);
+        this.privatekey.vector[i]=rand;
+
+        console.log( rand.toString(2).padZero(32).substring(0,16)+" "+rand.toString(2).padZero(32).substring(16,32)+" = "+rand+ " i="+i);
         //initopen
-        var splitrand = this.getRandomInt(1, rand);
-        this.openkey[0].push(splitrand);
-        this.openkey[1].push(rand - splitrand);
+        //var splitrand = this.getRandomInt(1, rand);
+        //this.openkey[0].push(splitrand);
+        //this.openkey[1].push(rand - splitrand);
         sum += rand;
     }
+    this.privatekey.v_q = this.nextPrime(this.privatekey.vector.reduce(function (a, b) {
+        return a + b;
+    }), Math.floor(Math.random() * this.maxq));
+    this.privatekey.v_r = Math.floor(Math.random() * (Math.floor(this.privatekey.v_q) - this.minr)) + this.minr;
+    console.log("q="+this.privatekey.v_q+"r="+this.privatekey.v_r);
+    console.log("open");
+
+    for (var j = 0; j < this.keyLen; j++) {
+        this.privatekey.vector[j] = this.privatekey.vector[j] * this.privatekey.v_r % this.privatekey.v_q;
+        console.log( this.privatekey.vector[j].toString(2).padZero(32).substring(0,16)+" "+
+            this.privatekey.vector[j].toString(2).padZero(32).substring(16,32)+" = "+
+            this.privatekey.vector[j]+ " i="+j);
+
+        this.openkey[0].push(parseInt(this.privatekey.vector[j].toString(2).padZero(32).substring(0,16),2));
+        this.openkey[1].push(parseInt(this.privatekey.vector[j].toString(2).padZero(32).substring(16,32),2));
+    }
+    console.log("open 2 vector");
 
     for (var i = 0; i < 2; i++) {
+        console.log("  vector "+(i+1));
         this.privatekey.q[i] = this.nextPrime(this.openkey[i].reduce(function (a, b) {
             return a + b;
         }), Math.floor(Math.random() * this.maxq));
@@ -66,21 +90,26 @@ Codered.prototype.createKey = function () {
 
         for (var j = 0; j < this.keyLen; j++) {
             this.openkey[i][j] = this.openkey[i][j] * this.privatekey.r[i] % this.privatekey.q[i];
+            console.log( this.openkey[i][j].toString(2).padZero(20)+ "  = "+ this.openkey[i][j] + " len=" +
+                this.openkey[i][j].toString(2).length+ " j="+j);
+
         }
+
     }
+    return true;
 
 };
 
 Codered.prototype.encode = function (bits) {
 
-    if (bits.length == this.keyLen) {
+    if (bits.length  <= this.keyLen) {
         var sum1=0;
         var sum2=0;
-        for (var i = 0; i < this.keyLen; i++) {
+        for (var i = 0; i < bits.length; i++) {
            sum1+=parseInt(bits[i])*this.openkey[0][i];
            sum2+=parseInt(bits[i])*this.openkey[1][i];
         }
-        console.log("sum12="+sum1.toString(10)+sum2.toString(10));
+        //console.log("sum12="+sum1.toString(10)+sum2.toString(10));
         console.log("sum1="+sum1);
         console.log("sum2="+sum2);
         sum1=sum1.toString(2);
