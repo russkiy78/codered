@@ -7,6 +7,18 @@
  * To change this template use File | Settings | File Templates.
  */
 
+function array_zip_merge() {
+    $output = array();
+    // The loop incrementer takes each array out of the loop as it gets emptied by array_shift().
+    for ($args = func_get_args(); count($args); $args = array_filter($args)) {
+        // &$arg allows array_shift() to change the original.
+        foreach ($args as &$arg) {
+            $output[] = array_shift($arg);
+        }
+    }
+    return $output;
+}
+
 define('VECTOR_LEN', 200);
 define('VECTOR_MAX_ELEMENT', 1000);
 define('VECTOR_MIN_ELEMENT', 1);
@@ -15,7 +27,7 @@ define('VECTOR_MIN_ELEMENT', 1);
 define('KEY_MAX_LEN_EVEN', 6);
 define('KEY_MAX_LEN_ODD', 6);
 
-$send_str="s assaassaasdasdsadasdasd";
+$send_str="s";
 
 $send='';
 
@@ -27,9 +39,14 @@ echo   "\n bit send = ".strlen($send);
 
 
 //exit;
+// main idea is using growing consistency!
+// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// in this case the sum of the first half of digits will always less then second one
 
 
 $vector = array();
+$vector_even = array();
+$vector_odd= array();
 $sum = 0;
 
 for ($i = 0; $i < VECTOR_LEN; $i++) {
@@ -39,19 +56,23 @@ for ($i = 0; $i < VECTOR_LEN; $i++) {
 
         } while ($rand % 2 == 0);
         $vector[$i] = $rand;
+        array_push($vector_odd,$rand);
         $sum += $rand;
     } else {
-
         do {
             $rand = rand(VECTOR_MIN_ELEMENT, VECTOR_MAX_ELEMENT);
         } while ($rand % 2 > 0);
         $vector[$i] = $rand;
+        array_push($vector_even,$rand);
         $sum += $rand;
     }
 }
+sort($vector_even);
+sort($vector_odd);
+
+$vector = array_zip_merge($vector_odd, $vector_even);
 
 echo "\nsecret vector\n";
-
 
 
 array_walk($vector, function ($i,$key) {echo $i." "; if ($key % 2) { echo "\n"; }; } );

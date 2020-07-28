@@ -3,7 +3,7 @@
  */
 var code;
 
-
+/*
 $(document).ready(function () {
     code = new Codered();
     code.createKey();
@@ -19,8 +19,9 @@ $(document).ready(function () {
     console.log(code.encode(str));
 
 });
+*/
 
-/*
+
 $(document).ready(function () {
      code = new Codered();
 
@@ -231,4 +232,3 @@ $(document).ready(function () {
 
 });
 
-*/
